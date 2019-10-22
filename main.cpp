@@ -79,7 +79,7 @@ NodeType *InitList(ItemType a[], int size);
 @param firstHalf: upon return, points to the first node of first splitted list
 @param secondHalf: upon return, points to the first node of the second half 
 */
-void Split(NodeType *head, NodeType *&firstHalf, NodeType *&secondHalf);
+NodeType * SplitHalf(NodeType *head);
 
 /* Merge two list into two 
  @param list1: points to the first list
@@ -102,6 +102,7 @@ int main()
     ItemType values[9] = {'a', '2', 'd', '4', '5', 'f', 'z', '9', 'f'};
     NodeType *list;
     NodeType *found;
+    NodeType *secondHead; //store second half head of split
 
     do
     {
@@ -183,19 +184,26 @@ int main()
             ClearLinkedList(list);
             break;
         case 'c': //Extra credit parts
-            cout << "Cut the list into half in the middle\n";
+            cout << "We shall cut the list into half...\n";
 
             //Todo by you, calling your function that breaks
             //a list into two
-            //
+            secondHead = SplitHalf(head);
+            
 
             //Display both lists using the DisplayLinkedList() functions
             //
+            cout << "~----LIST ONE-----~" <<endl;
+            DisplayLinkedList(head);
 
+            cout << "~----LIST TWO-----~" <<endl;
+           DisplayLinkedList(secondHead);
             // Merge the two lists back, the second sublist goes first
             //
-
+            head = Merge(head, secondHead);
             //Display the merged list
+            cout << "~-----NEW LIST-----~" <<endl;
+            DisplayLinkedList(head);
             break;
         case 'm':
             cout << "What new value do you want to insert in the middle?" << endl;
@@ -230,13 +238,15 @@ void DisplayLinkedList(NodeType *head)
 
     cout << "Displaying the list: " << endl;
     cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
-    while (p != NULL)
+    while (p)
     {
         cout << " Node at " << p << endl;
         cout << " 	value:  " << p->value << endl;
         cout << "	next:   " << p->next << endl;
         cout << "        previous:" << p->prev << endl;
+        if(p->next)
         p = p->next; //update p to point to next node in the linked list ...
+        else return;
     }
     cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
 }
@@ -276,7 +286,7 @@ void AppendInTheEnd(NodeType *&head, ItemType num)
         return;
     }
     //IF SELECTED SLOT NOT EMPTY
-    while (temp->next != NULL)
+    while (temp->value != 0)
     {
         prevy = temp;
         temp = temp->next;
@@ -286,6 +296,7 @@ void AppendInTheEnd(NodeType *&head, ItemType num)
             temp->value = num;
             NodeType *n = new NodeType;
             temp->next = n;
+            n->prev = temp;
             return;
         }
     }
@@ -422,4 +433,72 @@ void AppendMiddle(NodeType * &afterNode, ItemType beforeValue){
     newNode->prev = before;
     cout << "New node should have been inserted!!!" <<endl;
     //create new node for end
+}
+
+NodeType * SplitHalf(NodeType *head){
+    NodeType * temp = head;
+    NodeType * tempTwo = head;
+    int nodeCnt = 0;
+    int half = 0;
+    //end of list will have node with 0 value to get node count
+    while(temp->next != NULL){
+        temp = temp->next;
+        nodeCnt++;
+    }
+    cout << "This should be last head " << temp <<endl;
+    
+    if(temp->next == NULL){
+        temp = temp->prev;
+        temp->next = NULL;
+    }
+    
+    cout << "Count is --> " << nodeCnt << endl;
+    half =  nodeCnt/2;
+    cout << "Half is --> " << half <<endl; 
+    for (int i=0; i<half; i++){
+        tempTwo = tempTwo->next;
+    }
+    cout <<"Address of second head is" << tempTwo <<endl;
+    //cut head
+    temp = tempTwo->prev;
+    temp->next = NULL;
+    //make the new head
+    tempTwo->prev = NULL;
+
+    //NOW WE MUST REMOVE EMPTY ARRAY AT END OF TEMP TWO
+    
+    return tempTwo;
+}
+
+NodeType* Merge(NodeType * head, NodeType * secondHead){
+    //take account of empty node at end of original head
+    //second head ahead of head
+    
+    NodeType * temp = head;
+    NodeType * secondTemp = secondHead;
+    NodeType * addEmpty;
+    while(secondTemp->next != NULL){
+        secondTemp = secondTemp->next;
+    }
+        cout << "I passed" <<endl;
+
+
+    if(secondTemp->next == NULL){
+        secondTemp->next = temp;
+        temp->prev = secondTemp;
+        //point back to head
+        secondTemp = secondHead;
+        addEmpty = secondHead;
+        while(addEmpty->next!=NULL){
+            addEmpty = addEmpty->next;
+        }
+        if(addEmpty->next == NULL){
+            NodeType * newNode = new NodeType;
+            addEmpty->next = newNode;
+            newNode->prev = addEmpty;
+        }
+        return secondTemp;
+    }
+
+
 }
